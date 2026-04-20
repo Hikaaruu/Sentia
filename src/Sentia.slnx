@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Sentia.API/Sentia.API.csproj" />
+  <Project Path="Sentia.Application/Sentia.Application.csproj" />
+  <Project Path="Sentia.Domain/Sentia.Domain.csproj" />
+  <Project Path="Sentia.Infrastructure.Persistence/Sentia.Infrastructure.Persistence.csproj" />
+</Solution>
