@@ -2,5 +2,7 @@
   <Project Path="Sentia.API/Sentia.API.csproj" />
   <Project Path="Sentia.Application/Sentia.Application.csproj" />
   <Project Path="Sentia.Domain/Sentia.Domain.csproj" />
+  <Project Path="Sentia.Infrastructure.Cognitive/Sentia.Infrastructure.Cognitive.csproj" />
   <Project Path="Sentia.Infrastructure.Persistence/Sentia.Infrastructure.Persistence.csproj" />
+  <Project Path="Sentia.Infrastructure.RealTime/Sentia.Infrastructure.RealTime.csproj" />
 </Solution>
