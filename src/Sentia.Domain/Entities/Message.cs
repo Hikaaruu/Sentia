@@ -2,7 +2,7 @@
 
 public class Message
 {
-    public long Id { get; set; }
+    public required string Id { get; set; }
     public long ChatId { get; set; }
     public required string SenderId { get; set; }
     public required string Content { get; set; }

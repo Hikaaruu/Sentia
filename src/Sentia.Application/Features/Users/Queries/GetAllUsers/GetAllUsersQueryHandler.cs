@@ -10,20 +10,18 @@ namespace Sentia.Application.Features.Users.Queries.GetAllUsers;
 public class GetAllUsersQueryHandler(
     IApplicationDbContext context,
     IMapper mapper)
-    : IRequestHandler<GetAllUsersQuery, List<UserDto>>
+    : IRequestHandler<GetAllUsersQuery, GetAllUsersResult>
 {
-    public async Task<List<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+    public async Task<GetAllUsersResult> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
-        //put it in validation
-        var page = Math.Max(1, request.Page);
-        var pageSize = Math.Clamp(request.PageSize, 1, 100);
-
-        return await context.Users
+        var users = await context.Users
             .Where(u => u.Id != request.CurrentUserId)
             .OrderBy(u => u.UserName)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
             .ProjectTo<UserDto>(mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
+
+        return new GetAllUsersResult(users);
     }
 }

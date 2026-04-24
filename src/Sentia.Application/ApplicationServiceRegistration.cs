@@ -15,6 +15,7 @@ public static class ApplicationServiceRegistration
         {
             cfg.RegisterServicesFromAssembly(assembly);
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
         });
 
         services.AddValidatorsFromAssembly(assembly);

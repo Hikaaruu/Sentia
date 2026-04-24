@@ -18,10 +18,10 @@ public class UsersController(ISender sender) : ControllerBase
         CancellationToken cancellationToken = default)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var users = await sender.Send(
+        var result = await sender.Send(
             new GetAllUsersQuery(page, pageSize, currentUserId),
             cancellationToken);
 
-        return Ok(users);
+        return Ok(result.Users);
     }
 }

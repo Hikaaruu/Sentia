@@ -6,6 +6,10 @@ public class SendMessageCommandValidator : AbstractValidator<SendMessageCommand>
 {
     public SendMessageCommandValidator()
     {
+        RuleFor(x => x.MessageId)
+            .NotEmpty().WithMessage("MessageId is required.")
+            .MaximumLength(40).WithMessage("MessageId must not exceed 40 characters.");
+
         RuleFor(x => x.ChatId)
             .GreaterThan(0).WithMessage("ChatId must be a valid ID.");
 

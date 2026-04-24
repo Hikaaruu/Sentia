@@ -1,6 +1,7 @@
 using MediatR;
-using Sentia.Application.Features.Auth.Dtos;
 
 namespace Sentia.Application.Features.Auth.Commands.Register;
 
-public record RegisterCommand(string Username, string Password) : IRequest<AuthResultDto>;
+public record RegisterResult(string UserId, string Username);
+
+public record RegisterCommand(string Username, string Password) : IRequest<RegisterResult>;

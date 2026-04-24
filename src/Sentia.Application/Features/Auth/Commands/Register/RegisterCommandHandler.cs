@@ -1,14 +1,13 @@
 using MediatR;
 using Sentia.Application.Common.Exceptions;
 using Sentia.Application.Common.Interfaces;
-using Sentia.Application.Features.Auth.Dtos;
 
 namespace Sentia.Application.Features.Auth.Commands.Register;
 
 public class RegisterCommandHandler(IIdentityService identityService)
-    : IRequestHandler<RegisterCommand, AuthResultDto>
+    : IRequestHandler<RegisterCommand, RegisterResult>
 {
-    public async Task<AuthResultDto> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<RegisterResult> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var (success, userId, errors) = await identityService.CreateUserAsync(
             request.Username,
@@ -23,6 +22,6 @@ public class RegisterCommandHandler(IIdentityService identityService)
             throw new ValidationException(errorDict);
         }
 
-        return new AuthResultDto(userId, request.Username);
+        return new RegisterResult(userId, request.Username);
     }
 }

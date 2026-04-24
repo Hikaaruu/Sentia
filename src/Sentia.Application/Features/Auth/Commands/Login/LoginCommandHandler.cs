@@ -1,14 +1,13 @@
 using MediatR;
 using Sentia.Application.Common.Exceptions;
 using Sentia.Application.Common.Interfaces;
-using Sentia.Application.Features.Auth.Dtos;
 
 namespace Sentia.Application.Features.Auth.Commands.Login;
 
 public class LoginCommandHandler(IIdentityService identityService)
-    : IRequestHandler<LoginCommand, AuthResultDto>
+    : IRequestHandler<LoginCommand, LoginResult>
 {
-    public async Task<AuthResultDto> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<LoginResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var (success, userId) = await identityService.ValidateCredentialsAsync(
             request.Username,
@@ -17,6 +16,6 @@ public class LoginCommandHandler(IIdentityService identityService)
         if (!success)
             throw new ValidationException("Credentials", "Invalid username or password.");
 
-        return new AuthResultDto(userId, request.Username);
+        return new LoginResult(userId, request.Username);
     }
 }

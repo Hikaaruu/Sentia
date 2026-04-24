@@ -13,4 +13,15 @@ public interface ISignalRService
         IEnumerable<string> userIds,
         SentimentUpdatePayload payload,
         CancellationToken cancellationToken = default);
+
+    Task BroadcastReadReceiptAsync(
+        string recipientUserId,
+        ReadReceiptPayload payload,
+        CancellationToken cancellationToken = default);
+
+    Task BroadcastTypingAsync(
+        IEnumerable<string> recipientUserIds,
+        long chatId,
+        string senderId,
+        CancellationToken cancellationToken = default);
 }

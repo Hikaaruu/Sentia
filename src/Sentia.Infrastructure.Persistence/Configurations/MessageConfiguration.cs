@@ -11,7 +11,11 @@ public class MessageConfiguration : IEntityTypeConfiguration<Message>
         builder.ToTable("Messages");
 
         builder.HasKey(m => m.Id);
-        builder.Property(m => m.Id).UseIdentityColumn();
+
+        builder.Property(m => m.Id)
+            .HasMaxLength(40)
+            .ValueGeneratedNever()
+            .IsRequired();
 
         builder.Property(m => m.ChatId).IsRequired();
 

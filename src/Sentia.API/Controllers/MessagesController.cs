@@ -19,27 +19,27 @@ public class MessagesController(ISender sender) : ControllerBase
         CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var messageId = await sender.Send(
-            new SendMessageCommand(chatId, currentUserId, request.Content),
+        var result = await sender.Send(
+            new SendMessageCommand(request.MessageId, chatId, currentUserId, request.Content),
             cancellationToken);
 
-        return Ok(new { messageId });
+        return Ok(new { result.MessageId });
     }
 
     [HttpGet]
     public async Task<IActionResult> GetMessages(
         long chatId,
-        [FromQuery] long? before,
+        [FromQuery] string? before,
         [FromQuery] int take = 50,
         CancellationToken cancellationToken = default)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        var messages = await sender.Send(
+        var result = await sender.Send(
             new GetChatMessagesQuery(chatId, currentUserId, before, take),
             cancellationToken);
 
-        return Ok(messages);
+        return Ok(result.Messages);
     }
 }
 
-public record SendMessageRequest(string Content);
+public record SendMessageRequest(string MessageId, string Content);

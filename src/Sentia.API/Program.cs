@@ -74,6 +74,18 @@ app.Use(async (context, next) =>
         context.Response.ContentType = "application/json";
         await context.Response.WriteAsJsonAsync(new { errors = ex.Errors });
     }
+    catch (NotFoundException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status404NotFound;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+    }
+    catch (ForbiddenException ex)
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
+    }
 });
 
 if (app.Environment.IsDevelopment())

@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sentia.API.Services;
 using Sentia.Application.Features.Auth.Commands.Login;
@@ -24,6 +26,15 @@ public class AuthController(ISender sender, JwtService jwtService) : ControllerB
         var result = await sender.Send(new LoginCommand(request.Username, request.Password), cancellationToken);
         var token = jwtService.GenerateToken(result.UserId, result.Username);
         return Ok(new { token, result.UserId, result.Username });
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var username = User.FindFirstValue(ClaimTypes.Name)!;
+        return Ok(new { userId, username });
     }
 }
 
