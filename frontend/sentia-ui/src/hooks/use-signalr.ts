@@ -53,6 +53,12 @@ export function useSignalR() {
         pageParams: unknown[];
       }>(["messages", payload.chatId], (old) => {
         if (!old) return old;
+
+        const exists = old.pages.some((page) =>
+          page.some((msg) => msg.id === payload.messageId),
+        );
+        if (exists) return old;
+
         const pages = old.pages.map((p, i) =>
           i === old.pages.length - 1 ? [...p, newMsg] : p,
         );

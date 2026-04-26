@@ -3,7 +3,6 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ulid } from "ulid";
 import { toast } from "sonner";
 import { getMessages, sendMessage } from "@/api/messages";
 import type { MessageDto } from "@/api/types";
@@ -35,6 +34,7 @@ export function useMessages(chatId: number) {
 }
 
 interface SendMessageVariables {
+  messageId: string;
   content: string;
 }
 
@@ -43,18 +43,16 @@ export function useSendMessage(chatId: number) {
   const user = useAuthStore((s) => s.user);
 
   return useMutation({
-    mutationFn: ({ content }: SendMessageVariables) => {
-      const messageId = ulid();
+    mutationFn: ({ messageId, content }: SendMessageVariables) => {
       return sendMessage(chatId, { messageId, content });
     },
-    onMutate: async ({ content }) => {
+    onMutate: async ({ messageId, content }) => {
       await queryClient.cancelQueries({ queryKey: ["messages", chatId] });
 
       const snapshot = queryClient.getQueryData(["messages", chatId]);
 
-      const optimisticId = ulid();
       const optimistic: MessageDto = {
-        id: optimisticId,
+        id: messageId,
         chatId,
         senderId: user?.userId ?? "",
         content,
@@ -74,7 +72,7 @@ export function useSendMessage(chatId: number) {
         return { ...old, pages };
       });
 
-      return { snapshot, optimisticId };
+      return { snapshot, optimisticId: messageId };
     },
     onError(_err, _vars, context) {
       if (context?.snapshot) {

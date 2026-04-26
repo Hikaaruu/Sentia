@@ -2,6 +2,7 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sentia.Application.Common.Models;
 using Sentia.Application.Features.Users.Dtos;
 using Sentia.Application.Features.Users.Queries.GetAllUsers;
 
@@ -13,7 +14,7 @@ namespace Sentia.API.Controllers;
 public class UsersController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<List<UserDto>>> GetUsers(
+    public async Task<ActionResult<PaginatedResponse<UserDto>>> GetUsers(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -23,6 +24,6 @@ public class UsersController(ISender sender) : ControllerBase
             new GetAllUsersQuery(page, pageSize, currentUserId),
             cancellationToken);
 
-        return Ok(result.Users);
+        return Ok(result);
     }
 }
