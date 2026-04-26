@@ -37,6 +37,8 @@ export function MessageInput({ onSend, onTyping }: MessageInputProps) {
         )}
       >
         <textarea
+          id="chat-message-input"
+          name="chat-message"
           ref={ref}
           rows={1}
           disabled={isDisabled}

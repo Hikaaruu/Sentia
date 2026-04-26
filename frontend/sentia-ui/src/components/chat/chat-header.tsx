@@ -27,12 +27,12 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
       <Avatar className="h-8 w-8 shrink-0">
         <AvatarFallback className="text-xs">{initials}</AvatarFallback>
       </Avatar>
-      <div className="flex min-w-0 flex-col">
+      <div className="flex min-w-0 items-center gap-2">
         <span className="truncate text-sm font-medium leading-tight">
           {chat.otherParticipantUsername}
         </span>
         {isTyping && (
-          <span className="flex items-center gap-1 text-[10px] text-primary">
+          <span className="flex items-center gap-0.5 text-[10px] font-medium italic text-primary mt-0.5">
             <TypingDots />
           </span>
         )}

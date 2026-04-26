@@ -26,7 +26,8 @@ export function ChatListItem({ chat }: ChatListItemProps) {
   }
 
   const snippetNode = isTyping ? (
-    <span className="flex items-center gap-1 text-primary">
+    <span className="flex items-center gap-0.5 text-primary font-medium italic">
+      typing
       <TypingDots />
     </span>
   ) : (

@@ -7,7 +7,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
-import { Label } from "radix-ui";
+import { Label, Slot } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 const Form = FormProvider;
@@ -92,11 +92,11 @@ function FormLabel({
   );
 }
 
-function FormControl({ ...props }: React.ComponentProps<"div">) {
+function FormControl({ ...props }: React.ComponentProps<typeof Slot.Root>) {
   const { error, formItemId, formDescriptionId, formMessageId } =
     useFormField();
   return (
-    <div
+    <Slot.Root
       id={formItemId}
       aria-describedby={
         !error ? formDescriptionId : `${formDescriptionId} ${formMessageId}`
