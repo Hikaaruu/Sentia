@@ -6,10 +6,11 @@ import { useAuthStore } from "@/stores/auth.store";
 import { MessageBubble } from "./message-bubble";
 import { TypingIndicator } from "./typing-indicator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { parseUtcDate } from "@/lib/utils";
 
 function isSameDay(a: string, b: string) {
-  const da = new Date(a);
-  const db = new Date(b);
+  const da = parseUtcDate(a);
+  const db = parseUtcDate(b);
   return (
     da.getFullYear() === db.getFullYear() &&
     da.getMonth() === db.getMonth() &&
@@ -18,7 +19,7 @@ function isSameDay(a: string, b: string) {
 }
 
 function formatDateLabel(iso: string) {
-  const d = new Date(iso);
+  const d = parseUtcDate(iso);
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
@@ -97,12 +98,15 @@ export function MessageList({ chatId }: MessageListProps) {
   const markReadRef = useRef(markAsRead);
   markReadRef.current = markAsRead;
 
+  const lastReadSentRef = useRef<string | null>(null);
+
   useEffect(() => {
     const messages = data?.messages;
     if (!messages?.length) return;
-    const lastMsg = messages[messages.length - 1];
-    if (lastMsg && lastMsg.senderId !== userId) {
-      markReadRef.current({ messageId: lastMsg.id });
+    const lastOtherMsg = messages.findLast((msg) => msg.senderId !== userId);
+    if (lastOtherMsg && lastReadSentRef.current !== lastOtherMsg.id) {
+      lastReadSentRef.current = lastOtherMsg.id;
+      markReadRef.current({ messageId: lastOtherMsg.id });
     }
   }, [data?.messages, userId]);
 

@@ -20,7 +20,12 @@ public class ChatQueryService(ISqlConnectionFactory sqlConnectionFactory) : ICha
                     SELECT COUNT(*)
                     FROM Messages m
                     WHERE m.ChatId = c.Id
-                      AND (crs.LastReadMessageId IS NULL OR m.Id > crs.LastReadMessageId)
+                      AND m.SenderId != @UserId
+                      AND (
+                          crs.LastReadMessageId IS NULL 
+                          OR read_msg.Id IS NULL 
+                          OR m.CreatedAt > read_msg.CreatedAt
+                      )
                 ) AS UnreadCount,
                 other_crs.LastReadMessageId AS OtherParticipantLastReadMessageId
             FROM Chats c
@@ -36,6 +41,8 @@ public class ChatQueryService(ISqlConnectionFactory sqlConnectionFactory) : ICha
             -- Left join my read status
             LEFT JOIN ChatReadStatus crs 
                 ON c.Id = crs.ChatId AND crs.UserId = @UserId
+            LEFT JOIN Messages read_msg 
+                ON crs.LastReadMessageId = read_msg.Id
             LEFT JOIN ChatReadStatus other_crs 
                 ON c.Id = other_crs.ChatId AND other_crs.UserId = other_cp.UserId
             -- Outer Apply gets the single most recent message instantly
@@ -43,7 +50,7 @@ public class ChatQueryService(ISqlConnectionFactory sqlConnectionFactory) : ICha
                 SELECT TOP 1 m.Content, m.SenderId
                 FROM Messages m
                 WHERE m.ChatId = c.Id
-                ORDER BY m.Id DESC
+                ORDER BY m.CreatedAt DESC
             ) lm
             WHERE c.Type = 1 
             ORDER BY c.LastMessageAt DESC;";

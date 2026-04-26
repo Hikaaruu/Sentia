@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, parseUtcDate } from "@/lib/utils";
 import type { ChatSummaryDto } from "@/api/types";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -20,9 +20,12 @@ export function ChatListItem({ chat }: ChatListItemProps) {
       (chat.lastMessageContent.length > 40 ? "…" : "")
     : "No messages yet";
 
-  const timeAgo = formatDistanceToNow(new Date(chat.lastMessageAt), {
-    addSuffix: true,
-  });
+  const isNewChat = !chat.lastMessageContent;
+  const timeAgo = isNewChat
+    ? "New"
+    : formatDistanceToNow(parseUtcDate(chat.lastMessageAt), {
+        addSuffix: true,
+      });
 
   return (
     <NavLink

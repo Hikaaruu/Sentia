@@ -7,12 +7,13 @@ import { ChatList } from "@/components/chat/chat-list";
 import { NewChatModal } from "@/components/chat/new-chat-modal";
 import { useChats } from "@/hooks/use-chats";
 import { useAuthStore } from "@/stores/auth.store";
+import { useLogout } from "@/hooks/use-logout";
 
 export function Sidebar() {
   const [modalOpen, setModalOpen] = useState(false);
   const { data: chats, isLoading } = useChats();
   const user = useAuthStore((s) => s.user);
-  const clearAuth = useAuthStore((s) => s.clearAuth);
+  const logout = useLogout();
 
   const initials = user?.username.slice(0, 2).toUpperCase() ?? "?";
 
@@ -54,7 +55,7 @@ export function Sidebar() {
             size="icon"
             variant="ghost"
             className="h-7 w-7 text-muted-foreground"
-            onClick={clearAuth}
+            onClick={logout}
             aria-label="Sign out"
           >
             <LogOut className="h-3.5 w-3.5" />

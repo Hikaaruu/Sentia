@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn, parseUtcDate } from "@/lib/utils";
 import type { MessageDto } from "@/api/types";
 import { SentimentDot } from "./sentiment-dot";
 import { ReadReceipt } from "./read-receipt";
@@ -11,7 +11,7 @@ interface MessageBubbleProps {
 }
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString([], {
+  return parseUtcDate(iso).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });

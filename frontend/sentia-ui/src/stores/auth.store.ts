@@ -1,7 +1,6 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { MeResponse } from "@/api/types";
-
-const TOKEN_KEY = "sentia_token";
 
 interface AuthState {
   user: MeResponse | null;
@@ -10,17 +9,22 @@ interface AuthState {
   clearAuth: () => void;
 }
 
-export const useAuthStore = create<AuthState>()((set) => ({
-  user: null,
-  token: localStorage.getItem(TOKEN_KEY),
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
 
-  setAuth(user, token) {
-    localStorage.setItem(TOKEN_KEY, token);
-    set({ user, token });
-  },
+      setAuth(user, token) {
+        set({ user, token });
+      },
 
-  clearAuth() {
-    localStorage.removeItem(TOKEN_KEY);
-    set({ user: null, token: null });
-  },
-}));
+      clearAuth() {
+        set({ user: null, token: null });
+      },
+    }),
+    {
+      name: "sentia-auth",
+    },
+  ),
+);

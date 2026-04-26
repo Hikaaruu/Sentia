@@ -10,21 +10,22 @@ namespace Sentia.Application.Features.Chats.Commands.MarkChatAsRead;
 public class MarkChatAsReadCommandHandler(
     IApplicationDbContext context,
     IPublisher publisher)
-    : IRequestHandler<MarkChatAsReadCommand, MarkChatAsReadResult>
+    : IRequestHandler<MarkChatAsReadCommand>
 {
-    public async Task<MarkChatAsReadResult> Handle(
+    public async Task Handle(
         MarkChatAsReadCommand request,
         CancellationToken cancellationToken)
     {
-        var senderId = await context.Messages
-            .Where(m => m.Id == request.MessageId && m.ChatId == request.ChatId)
-            .Select(m => m.SenderId)
-            .FirstOrDefaultAsync(cancellationToken);
+        var targetMessage = await context.Messages
+        .Where(m => m.Id == request.MessageId && m.ChatId == request.ChatId)
+        .Select(m => new { m.SenderId, m.CreatedAt })
+        .FirstOrDefaultAsync(cancellationToken);
 
-        if (senderId is null)
+        if (targetMessage is null)
             throw new NotFoundException("Message", request.MessageId);
 
         var readStatus = await context.ChatReadStatus
+            .Include(crs => crs.LastReadMessage)
             .FirstOrDefaultAsync(
                 crs => crs.UserId == request.CurrentUserId && crs.ChatId == request.ChatId,
                 cancellationToken);
@@ -41,6 +42,12 @@ public class MarkChatAsReadCommandHandler(
         }
         else
         {
+
+            if (readStatus.LastReadMessage != null && targetMessage.CreatedAt <= readStatus.LastReadMessage.CreatedAt)
+            {
+                return;
+            }
+
             readStatus.LastReadMessageId = request.MessageId;
             readStatus.ReadAt = DateTime.UtcNow;
         }
@@ -50,10 +57,8 @@ public class MarkChatAsReadCommandHandler(
         await publisher.Publish(new MessageReadEvent(
             MessageId: request.MessageId,
             ChatId: request.ChatId,
-            SenderId: senderId,
+            SenderId: targetMessage.SenderId,
             ReadByUserId: request.CurrentUserId),
             cancellationToken);
-
-        return new MarkChatAsReadResult();
     }
 }

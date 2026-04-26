@@ -1,7 +1,7 @@
 import { useParams, Navigate } from "react-router-dom";
 import { useChats } from "@/hooks/use-chats";
 import { useSendMessage } from "@/hooks/use-messages";
-import { useSignalR } from "@/hooks/use-signalr";
+import { sendTypingIndicator } from "@/hooks/use-signalr";
 import { ChatHeader } from "@/components/chat/chat-header";
 import { MessageList } from "@/components/chat/message-list";
 import { MessageInput } from "@/components/chat/message-input";
@@ -13,7 +13,6 @@ export default function ChatWindow() {
 
   const { data: chats, isLoading } = useChats();
   const { mutate: sendMessage } = useSendMessage(chatId);
-  const { sendTyping } = useSignalR();
 
   if (isLoading) {
     return (
@@ -35,7 +34,7 @@ export default function ChatWindow() {
   }
 
   function handleTyping() {
-    sendTyping(chatId);
+    sendTypingIndicator(chatId);
   }
 
   return (

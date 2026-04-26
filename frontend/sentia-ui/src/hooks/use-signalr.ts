@@ -3,6 +3,7 @@ import {
   HubConnectionBuilder,
   HubConnectionState,
   LogLevel,
+  HubConnection,
 } from "@microsoft/signalr";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/auth.store";
@@ -16,6 +17,14 @@ import type {
   MessageDto,
   ChatSummaryDto,
 } from "@/api/types";
+
+let globalConnection: HubConnection | null = null;
+
+export function sendTypingIndicator(chatId: number) {
+  if (globalConnection?.state === HubConnectionState.Connected) {
+    globalConnection.invoke("SendTyping", chatId).catch(() => undefined);
+  }
+}
 
 export function useSignalR() {
   const queryClient = useQueryClient();
@@ -34,6 +43,8 @@ export function useSignalR() {
   }
 
   useEffect(() => {
+    if (globalConnection) return;
+
     const connection = buildConnection();
     connectionRef.current = connection;
 
@@ -47,7 +58,7 @@ export function useSignalR() {
         sentimentScore: null,
         sentimentLabel: null,
       };
-      // Append to the last page of the infinite message list
+
       queryClient.setQueryData<{
         pages: MessageDto[][];
         pageParams: unknown[];
@@ -136,17 +147,8 @@ export function useSignalR() {
 
     return () => {
       connection.stop();
-      connectionRef.current = null;
+      globalConnection = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const sendTyping = useCallback((chatId: number) => {
-    const conn = connectionRef.current;
-    if (conn?.state === HubConnectionState.Connected) {
-      conn.invoke("SendTyping", chatId).catch(() => undefined);
-    }
-  }, []);
-
-  return { sendTyping };
 }

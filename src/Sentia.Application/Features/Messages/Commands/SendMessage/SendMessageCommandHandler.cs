@@ -34,8 +34,7 @@ public class SendMessageCommandHandler(
         context.Messages.Add(message);
 
         var chat = await context.Chats.FindAsync([request.ChatId], cancellationToken);
-        if (chat is not null)
-            chat.LastMessageAt = now;
+        chat?.LastMessageAt = now;
 
         await context.SaveChangesAsync(cancellationToken);
 
