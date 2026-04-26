@@ -79,6 +79,14 @@ export function useSignalR() {
       // Update chat list summary
       queryClient.setQueryData<ChatSummaryDto[]>(["chats"], (old) => {
         if (!old) return old;
+
+        const chatExists = old.some((c) => c.chatId === payload.chatId);
+
+        if (!chatExists) {
+          queryClient.invalidateQueries({ queryKey: ["chats"] });
+          return old;
+        }
+
         return old.map((chat) =>
           chat.chatId === payload.chatId
             ? {

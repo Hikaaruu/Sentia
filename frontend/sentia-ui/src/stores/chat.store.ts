@@ -11,16 +11,27 @@ interface ChatState {
   clearTyping: (chatId: number) => void;
 }
 
-export const useChatStore = create<ChatState>()((set) => ({
+const typingTimeouts: Record<number, ReturnType<typeof setTimeout>> = {};
+
+export const useChatStore = create<ChatState>()((set, get) => ({
   typingUsers: {},
 
   setTyping(chatId, senderId) {
+    if (typingTimeouts[chatId]) {
+      clearTimeout(typingTimeouts[chatId]);
+    }
+
     set((state) => ({
       typingUsers: {
         ...state.typingUsers,
         [chatId]: { senderId, timestamp: Date.now() },
       },
     }));
+
+    typingTimeouts[chatId] = setTimeout(() => {
+      get().clearTyping(chatId);
+      delete typingTimeouts[chatId];
+    }, 3000);
   },
 
   clearTyping(chatId) {

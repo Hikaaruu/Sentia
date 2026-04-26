@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn, parseUtcDate } from "@/lib/utils";
 import type { ChatSummaryDto } from "@/api/types";
 import { useAuthStore } from "@/stores/auth.store";
+import { useChatStore } from "@/stores/chat.store";
 
 interface ChatListItemProps {
   chat: ChatSummaryDto;
@@ -12,13 +13,24 @@ interface ChatListItemProps {
 
 export function ChatListItem({ chat }: ChatListItemProps) {
   const userId = useAuthStore((s) => s.user?.userId);
+  const isTyping = useChatStore((s) => !!s.typingUsers[chat.chatId]);
   const initials = chat.otherParticipantUsername.slice(0, 2).toUpperCase();
 
-  const snippet = chat.lastMessageContent
-    ? (chat.lastMessageSenderId === userId ? "You: " : "") +
+  let snippetText = "No messages yet";
+  if (chat.lastMessageContent) {
+    snippetText =
+      (chat.lastMessageSenderId === userId ? "You: " : "") +
       chat.lastMessageContent.slice(0, 40) +
-      (chat.lastMessageContent.length > 40 ? "…" : "")
-    : "No messages yet";
+      (chat.lastMessageContent.length > 40 ? "…" : "");
+  }
+
+  const snippetNode = isTyping ? (
+    <span className="font-medium italic text-primary animate-pulse">
+      typing...
+    </span>
+  ) : (
+    snippetText
+  );
 
   const isNewChat = !chat.lastMessageContent;
   const timeAgo = isNewChat
@@ -52,7 +64,7 @@ export function ChatListItem({ chat }: ChatListItemProps) {
         </div>
         <div className="flex items-center justify-between gap-1">
           <span className="truncate text-xs text-muted-foreground">
-            {snippet}
+            {snippetNode}
           </span>
           {chat.unreadCount > 0 && (
             <Badge className="h-4 min-w-4 shrink-0 rounded-full px-1 text-[10px]">

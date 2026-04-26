@@ -4,7 +4,6 @@ import { useMarkAsRead } from "@/hooks/use-chats";
 import { useChats } from "@/hooks/use-chats";
 import { useAuthStore } from "@/stores/auth.store";
 import { MessageBubble } from "./message-bubble";
-import { TypingIndicator } from "./typing-indicator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parseUtcDate } from "@/lib/utils";
 
@@ -46,30 +45,29 @@ export function MessageList({ chatId }: MessageListProps) {
 
   const topSentinelRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const isInitialLoad = useRef(true);
 
   const chat = chats?.find((c) => c.chatId === chatId);
   const otherLastReadId = chat?.otherParticipantLastReadMessageId ?? null;
 
-  // Scroll to bottom on initial load and new incoming messages
-  useEffect(() => {
-    if (isInitialLoad.current && data?.messages?.length) {
-      bottomRef.current?.scrollIntoView({ behavior: "instant" });
-      isInitialLoad.current = false;
-    }
-  }, [data?.messages?.length]);
-
-  // Auto-scroll to bottom when new messages arrive (only if already near bottom)
   const prevLength = useRef(0);
+  const isInitialLoad = useRef(true);
+
   useEffect(() => {
-    const messages = data?.messages ?? [];
-    if (messages.length > prevLength.current && !isInitialLoad.current) {
-      const lastMsg = messages[messages.length - 1];
-      if (lastMsg?.senderId === userId) {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const messagesArray = data?.messages ?? [];
+    const currentLength = messagesArray.length;
+
+    if (currentLength > 0) {
+      if (isInitialLoad.current) {
+        bottomRef.current?.scrollIntoView({ behavior: "instant" });
+        isInitialLoad.current = false;
+      } else if (currentLength > prevLength.current) {
+        const lastMsg = messagesArray[currentLength - 1];
+        if (lastMsg?.senderId === userId) {
+          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
       }
     }
-    prevLength.current = messages.length;
+    prevLength.current = currentLength;
   }, [data?.messages, userId]);
 
   // Observe top sentinel for infinite scroll
@@ -163,13 +161,6 @@ export function MessageList({ chatId }: MessageListProps) {
           );
         })}
       </div>
-
-      {chat && (
-        <TypingIndicator
-          chatId={chatId}
-          username={chat.otherParticipantUsername}
-        />
-      )}
 
       {/* Bottom anchor — scrolled to on new own messages */}
       <div
