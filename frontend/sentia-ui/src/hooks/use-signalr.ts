@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect } from "react";
 import {
   HubConnectionBuilder,
   HubConnectionState,
@@ -18,7 +18,8 @@ import type {
   ChatSummaryDto,
 } from "@/api/types";
 
-let globalConnection: HubConnection | null = null;
+export let globalConnection: HubConnection | null = null;
+let isConnecting = false;
 
 export function sendTypingIndicator(chatId: number) {
   if (globalConnection?.state === HubConnectionState.Connected) {
@@ -30,7 +31,6 @@ export function useSignalR() {
   const queryClient = useQueryClient();
   const setTyping = useChatStore((s) => s.setTyping);
   const setStatus = useSignalRStore((s) => s.setStatus);
-  const connectionRef = useRef<ReturnType<typeof buildConnection> | null>(null);
 
   function buildConnection() {
     return new HubConnectionBuilder()
@@ -46,7 +46,7 @@ export function useSignalR() {
     if (globalConnection) return;
 
     const connection = buildConnection();
-    connectionRef.current = connection;
+    globalConnection = connection;
 
     connection.on("ReceiveNewMessage", (payload: NewMessagePayload) => {
       const newMsg: MessageDto = {
@@ -147,16 +147,23 @@ export function useSignalR() {
     connection.onreconnected(() => setStatus("connected"));
     connection.onclose(() => setStatus("disconnected"));
 
-    setStatus("connecting");
-    connection
-      .start()
-      .then(() => setStatus("connected"))
-      .catch(() => setStatus("disconnected"));
+    if (connection.state === HubConnectionState.Disconnected && !isConnecting) {
+      isConnecting = true;
+      setStatus("connecting");
+      connection
+        .start()
+        .then(() => {
+          isConnecting = false;
+          setStatus("connected");
+        })
+        .catch((err) => {
+          isConnecting = false;
+          setStatus("disconnected");
+          console.error("SignalR Connection Error: ", err);
+        });
+    }
 
-    return () => {
-      connection.stop();
-      globalConnection = null;
-    };
+    return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

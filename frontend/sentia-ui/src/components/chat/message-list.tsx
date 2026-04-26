@@ -45,6 +45,7 @@ export function MessageList({ chatId }: MessageListProps) {
 
   const topSentinelRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const chat = chats?.find((c) => c.chatId === chatId);
   const otherLastReadId = chat?.otherParticipantLastReadMessageId ?? null;
@@ -58,7 +59,10 @@ export function MessageList({ chatId }: MessageListProps) {
 
     if (currentLength > 0) {
       if (isInitialLoad.current) {
-        bottomRef.current?.scrollIntoView({ behavior: "instant" });
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop =
+            scrollContainerRef.current.scrollHeight;
+        }
         isInitialLoad.current = false;
       } else if (currentLength > prevLength.current) {
         const lastMsg = messagesArray[currentLength - 1];
@@ -112,6 +116,7 @@ export function MessageList({ chatId }: MessageListProps) {
 
   return (
     <div
+      ref={scrollContainerRef}
       className="flex-1 overflow-y-auto px-4 py-4"
       style={{ overflowAnchor: "auto" } as React.CSSProperties}
     >
