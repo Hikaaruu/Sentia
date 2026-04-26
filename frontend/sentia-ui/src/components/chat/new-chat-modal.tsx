@@ -12,6 +12,7 @@ import { useUsers } from "@/hooks/use-users";
 import { useChats, useCreateChat } from "@/hooks/use-chats";
 import type { UserDto } from "@/api/types";
 import { useAuthStore } from "@/stores/auth.store";
+import { usePresenceStore } from "@/stores/presence.store";
 
 interface NewChatModalProps {
   open: boolean;
@@ -25,6 +26,7 @@ export function NewChatModal({ open, onOpenChange }: NewChatModalProps) {
     useUsers();
   const { mutate: createChat, isPending } = useCreateChat();
   const [creatingFor, setCreatingFor] = useState<string | null>(null);
+  const onlineUsers = usePresenceStore((s) => s.onlineUsers);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +96,7 @@ export function NewChatModal({ open, onOpenChange }: NewChatModalProps) {
 
           <div className="flex flex-col gap-0.5 p-2">
             {users.map((user) => {
+              const isOnline = onlineUsers.has(user.id);
               const hasChat = existingChatUserIds.has(user.id);
               const isCreating = creatingFor === user.id;
 
@@ -102,11 +105,16 @@ export function NewChatModal({ open, onOpenChange }: NewChatModalProps) {
                   key={user.id}
                   className="flex items-center gap-3 rounded-lg px-3 py-2"
                 >
-                  <Avatar className="h-8 w-8 shrink-0">
-                    <AvatarFallback className="text-xs">
-                      {user.userName.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative shrink-0">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs">
+                        {user.userName.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {isOnline && (
+                      <span className="absolute right-0 bottom-0 h-2 w-2 rounded-full border-2 border-background bg-emerald-500" />
+                    )}
+                  </div>
                   <span className="flex-1 text-sm font-medium">
                     {user.userName}
                   </span>

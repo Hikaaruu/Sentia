@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/auth.store";
 import { useChatStore } from "@/stores/chat.store";
 import { useSignalRStore } from "@/stores/signalr.store";
+import { usePresenceStore } from "@/stores/presence.store";
 import type {
   NewMessagePayload,
   SentimentUpdatePayload,
@@ -43,6 +44,10 @@ export function useSignalR() {
   const queryClient = useQueryClient();
   const setTyping = useChatStore((s) => s.setTyping);
   const setStatus = useSignalRStore((s) => s.setStatus);
+
+  const setOnlineUsers = usePresenceStore((s) => s.setOnlineUsers);
+  const addOnlineUser = usePresenceStore((s) => s.addOnlineUser);
+  const removeOnlineUser = usePresenceStore((s) => s.removeOnlineUser);
 
   function buildConnection() {
     return new HubConnectionBuilder()
@@ -155,6 +160,11 @@ export function useSignalR() {
       setTyping(payload.chatId, payload.senderId);
     });
 
+    connection.on("UserIsOnline", (userId: string) => addOnlineUser(userId));
+    connection.on("UserIsOffline", (userId: string) =>
+      removeOnlineUser(userId),
+    );
+
     connection.onreconnecting(() => setStatus("connecting"));
     connection.onreconnected(() => setStatus("connected"));
     connection.onclose(() => setStatus("disconnected"));
@@ -167,6 +177,10 @@ export function useSignalR() {
         .then(() => {
           isConnecting = false;
           setStatus("connected");
+          connection
+            .invoke<string[]>("GetOnlineUsers")
+            .then((userIds) => setOnlineUsers(userIds))
+            .catch((err) => console.error("Failed to fetch online users", err));
         })
         .catch((err) => {
           isConnecting = false;
@@ -177,5 +191,5 @@ export function useSignalR() {
 
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [addOnlineUser, removeOnlineUser, setOnlineUsers, setStatus]);
 }

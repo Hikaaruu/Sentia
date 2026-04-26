@@ -9,6 +9,7 @@ using Sentia.Infrastructure.RealTime.Hubs;
 using Sentia.API.Services;
 using Scalar.AspNetCore;
 using Sentia.API.Infrastructure;
+using Sentia.API.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,8 @@ builder.Services.AddRealTime(builder.Configuration);
 builder.Services.AddCognitive(builder.Configuration);
 
 builder.Services.AddSingleton<JwtService>();
+
+builder.Services.AddHostedService<SentimentBackgroundWorker>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

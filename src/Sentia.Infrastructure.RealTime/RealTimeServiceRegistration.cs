@@ -9,6 +9,7 @@ public static class RealTimeServiceRegistration
 {
     public static IServiceCollection AddRealTime(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<PresenceTracker>();
         services.AddScoped<ISignalRService, SignalRService>();
         services.AddSignalR()
             .AddAzureSignalR(configuration.GetConnectionString("AzureSignalR"));

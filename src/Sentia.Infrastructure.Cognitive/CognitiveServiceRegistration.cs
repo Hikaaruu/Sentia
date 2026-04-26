@@ -16,6 +16,7 @@ public static class CognitiveServiceRegistration
             configuration.GetSection(AzureAiLanguageOptions.SectionName));
 
         services.AddScoped<ISentimentAnalysisService, SentimentAnalysisService>();
+        services.AddSingleton<ISentimentAnalysisQueue, SentimentAnalysisQueue>();
 
         return services;
     }

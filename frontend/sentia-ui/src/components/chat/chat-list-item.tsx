@@ -7,6 +7,7 @@ import type { ChatSummaryDto } from "@/api/types";
 import { useAuthStore } from "@/stores/auth.store";
 import { useChatStore } from "@/stores/chat.store";
 import { TypingDots } from "./typing-dots";
+import { usePresenceStore } from "@/stores/presence.store";
 
 interface ChatListItemProps {
   chat: ChatSummaryDto;
@@ -15,6 +16,9 @@ interface ChatListItemProps {
 export function ChatListItem({ chat }: ChatListItemProps) {
   const userId = useAuthStore((s) => s.user?.userId);
   const isTyping = useChatStore((s) => !!s.typingUsers[chat.chatId]);
+  const isOnline = usePresenceStore((s) =>
+    s.onlineUsers.has(chat.otherParticipantId),
+  );
   const initials = chat.otherParticipantUsername.slice(0, 2).toUpperCase();
 
   let snippetText = "No messages yet";
@@ -51,9 +55,14 @@ export function ChatListItem({ chat }: ChatListItemProps) {
         )
       }
     >
-      <Avatar className="h-9 w-9 shrink-0">
-        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-      </Avatar>
+      <div className="relative shrink-0">
+        <Avatar className="h-9 w-9">
+          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+        </Avatar>
+        {isOnline && (
+          <span className="absolute right-0 bottom-0 h-2.5 w-2.5 rounded-full border-2 border-background bg-emerald-500" />
+        )}
+      </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-baseline justify-between gap-1">

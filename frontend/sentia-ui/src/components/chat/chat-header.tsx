@@ -4,6 +4,7 @@ import { useChatStore } from "@/stores/chat.store";
 import { TypingDots } from "./typing-dots";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { usePresenceStore } from "@/stores/presence.store";
 
 interface ChatHeaderProps {
   chat: ChatSummaryDto;
@@ -12,6 +13,9 @@ interface ChatHeaderProps {
 export function ChatHeader({ chat }: ChatHeaderProps) {
   const initials = chat.otherParticipantUsername.slice(0, 2).toUpperCase();
   const isTyping = useChatStore((s) => !!s.typingUsers[chat.chatId]);
+  const isOnline = usePresenceStore((s) =>
+    s.onlineUsers.has(chat.otherParticipantId),
+  );
   const navigate = useNavigate();
 
   return (
@@ -24,9 +28,14 @@ export function ChatHeader({ chat }: ChatHeaderProps) {
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
-      <Avatar className="h-8 w-8 shrink-0">
-        <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-      </Avatar>
+      <div className="relative shrink-0">
+        <Avatar className="h-8 w-8 shrink-0">
+          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+        </Avatar>
+        {isOnline && (
+          <span className="absolute right-0 bottom-0 h-2 w-2 rounded-full border-2 border-background bg-emerald-500" />
+        )}
+      </div>
       <div className="flex min-w-0 items-center gap-2">
         <span className="truncate text-sm font-medium leading-tight">
           {chat.otherParticipantUsername}
