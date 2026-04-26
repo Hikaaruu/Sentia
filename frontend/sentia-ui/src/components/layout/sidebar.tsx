@@ -19,7 +19,7 @@ export function Sidebar() {
 
   return (
     <>
-      <aside className="flex h-full w-72 shrink-0 flex-col border-r border-border bg-background">
+      <aside className="flex h-full w-full flex-col border-r border-border bg-background">
         {/* Header */}
         <div className="flex h-14 items-center justify-between px-4">
           <span className="text-base font-semibold tracking-tight">Sentia</span>

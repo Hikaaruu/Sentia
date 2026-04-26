@@ -6,6 +6,7 @@ import { cn, parseUtcDate } from "@/lib/utils";
 import type { ChatSummaryDto } from "@/api/types";
 import { useAuthStore } from "@/stores/auth.store";
 import { useChatStore } from "@/stores/chat.store";
+import { TypingDots } from "./typing-dots";
 
 interface ChatListItemProps {
   chat: ChatSummaryDto;
@@ -25,8 +26,8 @@ export function ChatListItem({ chat }: ChatListItemProps) {
   }
 
   const snippetNode = isTyping ? (
-    <span className="font-medium italic text-primary animate-pulse">
-      typing...
+    <span className="flex items-center gap-1 text-primary">
+      <TypingDots />
     </span>
   ) : (
     snippetText

@@ -50,29 +50,37 @@ export function MessageList({ chatId }: MessageListProps) {
   const chat = chats?.find((c) => c.chatId === chatId);
   const otherLastReadId = chat?.otherParticipantLastReadMessageId ?? null;
 
-  const prevLength = useRef(0);
+  const lastMessageIdRef = useRef<string | null>(null);
   const isInitialLoad = useRef(true);
 
+  // Reset scroll state when the chat changes
   useEffect(() => {
-    const messagesArray = data?.messages ?? [];
-    const currentLength = messagesArray.length;
+    isInitialLoad.current = true;
+    lastMessageIdRef.current = null;
+  }, [chatId]);
 
-    if (currentLength > 0) {
-      if (isInitialLoad.current) {
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTop =
-            scrollContainerRef.current.scrollHeight;
-        }
-        isInitialLoad.current = false;
-      } else if (currentLength > prevLength.current) {
-        const lastMsg = messagesArray[currentLength - 1];
-        if (lastMsg?.senderId === userId) {
-          bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        }
+  useEffect(() => {
+    const messages = data?.messages ?? [];
+    if (messages.length === 0) return;
+
+    const lastMsg = messages[messages.length - 1];
+
+    if (isInitialLoad.current) {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop =
+          scrollContainerRef.current.scrollHeight;
+      }
+      isInitialLoad.current = false;
+    } else if (lastMsg.id !== lastMessageIdRef.current) {
+      // New message appended — scroll to bottom regardless of sender
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop =
+          scrollContainerRef.current.scrollHeight;
       }
     }
-    prevLength.current = currentLength;
-  }, [data?.messages, userId]);
+
+    lastMessageIdRef.current = lastMsg.id;
+  }, [data?.messages]);
 
   // Observe top sentinel for infinite scroll
   useEffect(() => {

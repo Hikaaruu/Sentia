@@ -27,6 +27,18 @@ export function sendTypingIndicator(chatId: number) {
   }
 }
 
+export function disconnectSignalR() {
+  if (
+    globalConnection &&
+    globalConnection.state !== HubConnectionState.Disconnected
+  ) {
+    globalConnection.stop().catch(() => undefined);
+  }
+  globalConnection = null;
+  isConnecting = false;
+  useSignalRStore.getState().setStatus("disconnected");
+}
+
 export function useSignalR() {
   const queryClient = useQueryClient();
   const setTyping = useChatStore((s) => s.setTyping);
