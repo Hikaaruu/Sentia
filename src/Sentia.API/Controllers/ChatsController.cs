@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sentia.Application.Features.Chats.Commands.CreateOrGetPrivateChat;
 using Sentia.Application.Features.Chats.Commands.MarkChatAsRead;
+using Sentia.Application.Features.Chats.Dtos;
 using Sentia.Application.Features.Chats.Queries.GetUserChats;
 
 namespace Sentia.API.Controllers;
@@ -14,7 +15,7 @@ namespace Sentia.API.Controllers;
 public class ChatsController(ISender sender) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateOrGetPrivateChat(
+    public async Task<ActionResult<CreateOrGetPrivateChatResult>> CreateOrGetPrivateChat(
         [FromBody] CreateChatRequest request,
         CancellationToken cancellationToken)
     {
@@ -27,14 +28,14 @@ public class ChatsController(ISender sender) : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUserChats(CancellationToken cancellationToken)
+    public async Task<ActionResult<List<ChatSummaryDto>>> GetUserChats(CancellationToken cancellationToken)
     {
         var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var result = await sender.Send(new GetUserChatsQuery(currentUserId), cancellationToken);
         return Ok(result.Chats);
     }
 
-    [HttpPost("{chatId:long}/read")]
+    [HttpPost("{chatId}/read")]
     public async Task<IActionResult> MarkAsRead(
         long chatId,
         [FromBody] MarkAsReadRequest request,

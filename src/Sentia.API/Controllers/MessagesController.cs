@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sentia.Application.Features.Messages.Commands.SendMessage;
+using Sentia.Application.Features.Messages.Dtos;
 using Sentia.Application.Features.Messages.Queries.GetChatMessages;
 
 namespace Sentia.API.Controllers;
@@ -13,7 +14,7 @@ namespace Sentia.API.Controllers;
 public class MessagesController(ISender sender) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> SendMessage(
+    public async Task<ActionResult<SendMessageResponse>> SendMessage(
         long chatId,
         [FromBody] SendMessageRequest request,
         CancellationToken cancellationToken)
@@ -23,11 +24,11 @@ public class MessagesController(ISender sender) : ControllerBase
             new SendMessageCommand(request.MessageId, chatId, currentUserId, request.Content),
             cancellationToken);
 
-        return Ok(new { result.MessageId });
+        return Ok(new SendMessageResponse(result.MessageId));
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetMessages(
+    public async Task<ActionResult<List<MessageDto>>> GetMessages(
         long chatId,
         [FromQuery] string? before,
         [FromQuery] int take = 50,
@@ -43,3 +44,4 @@ public class MessagesController(ISender sender) : ControllerBase
 }
 
 public record SendMessageRequest(string MessageId, string Content);
+public record SendMessageResponse(string MessageId);

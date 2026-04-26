@@ -21,7 +21,8 @@ public class ChatQueryService(ISqlConnectionFactory sqlConnectionFactory) : ICha
                     FROM Messages m
                     WHERE m.ChatId = c.Id
                       AND (crs.LastReadMessageId IS NULL OR m.Id > crs.LastReadMessageId)
-                ) AS UnreadCount
+                ) AS UnreadCount,
+                other_crs.LastReadMessageId AS OtherParticipantLastReadMessageId
             FROM Chats c
             -- Find 'me' in the chat
             INNER JOIN ChatParticipants my_cp 
@@ -35,6 +36,8 @@ public class ChatQueryService(ISqlConnectionFactory sqlConnectionFactory) : ICha
             -- Left join my read status
             LEFT JOIN ChatReadStatus crs 
                 ON c.Id = crs.ChatId AND crs.UserId = @UserId
+            LEFT JOIN ChatReadStatus other_crs 
+                ON c.Id = other_crs.ChatId AND other_crs.UserId = other_cp.UserId
             -- Outer Apply gets the single most recent message instantly
             OUTER APPLY (
                 SELECT TOP 1 m.Content, m.SenderId
@@ -42,7 +45,7 @@ public class ChatQueryService(ISqlConnectionFactory sqlConnectionFactory) : ICha
                 WHERE m.ChatId = c.Id
                 ORDER BY m.Id DESC
             ) lm
-            WHERE c.Type = 1 -- Enforce 1:1 Private Chats only
+            WHERE c.Type = 1 
             ORDER BY c.LastMessageAt DESC;";
 
         using var connection = sqlConnectionFactory.CreateConnection();

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sentia.Application.Features.Users.Dtos;
 using Sentia.Application.Features.Users.Queries.GetAllUsers;
 
 namespace Sentia.API.Controllers;
@@ -12,7 +13,7 @@ namespace Sentia.API.Controllers;
 public class UsersController(ISender sender) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetUsers(
+    public async Task<ActionResult<List<UserDto>>> GetUsers(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)

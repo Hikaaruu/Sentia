@@ -7,6 +7,7 @@ public record CreateOrGetPrivateChatResult(
     bool IsNew,
     string OtherParticipantId,
     string OtherParticipantUsername,
+    string? OtherParticipantLastReadMessageId,
     DateTime CreatedAt);
 
 public record CreateOrGetPrivateChatCommand(

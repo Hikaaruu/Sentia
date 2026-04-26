@@ -1,18 +1,29 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.OpenApi;
 using Sentia.Application;
-using Sentia.Application.Common.Exceptions;
 using Sentia.Infrastructure.Cognitive;
 using Sentia.Infrastructure.Persistence;
 using Sentia.Infrastructure.RealTime;
 using Sentia.Infrastructure.RealTime.Hubs;
 using Sentia.API.Services;
-using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+using Sentia.API.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddApplication();
 builder.Services.AddPersistence(builder.Configuration);
@@ -20,6 +31,9 @@ builder.Services.AddRealTime(builder.Configuration);
 builder.Services.AddCognitive(builder.Configuration);
 
 builder.Services.AddSingleton<JwtService>();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -36,7 +50,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
 
-        // Allow JWT via query string for SignalR connections
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -51,42 +64,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddControllers();
-
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-
-
 var app = builder.Build();
 
-app.Use(async (context, next) =>
-{
-    try
-    {
-        await next(context);
-    }
-    catch (ValidationException ex)
-    {
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { errors = ex.Errors });
-    }
-    catch (NotFoundException ex)
-    {
-        context.Response.StatusCode = StatusCodes.Status404NotFound;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
-    }
-    catch (ForbiddenException ex)
-    {
-        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(new { error = ex.Message });
-    }
-});
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
@@ -100,6 +84,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();

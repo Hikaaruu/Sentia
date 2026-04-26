@@ -17,17 +17,22 @@ public class CreateOrGetPrivateChatCommandHandler(
         var recipient = await context.Users
             .Where(u => u.Id == request.RecipientUserId)
             .Select(u => new { u.Id, u.UserName })
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("User", request.RecipientUserId);
 
-        if (recipient is null)
-            throw new NotFoundException("User", request.RecipientUserId);
-
-        // Find existing private chat between these two users
         var existingChat = await context.Chats
             .Where(c => c.Type == ChatType.Private
                     && c.Participants.Any(p => p.UserId == request.CurrentUserId)
                     && c.Participants.Any(p => p.UserId == request.RecipientUserId))
-            .Select(c => new { c.Id, c.CreatedAt })
+            .Select(c => new
+            {
+                c.Id,
+                c.CreatedAt,
+                OtherParticipantLastReadMessageId = context.ChatReadStatus
+                    .Where(crs => crs.ChatId == c.Id && crs.UserId == request.RecipientUserId)
+                    .Select(crs => crs.LastReadMessageId)
+                    .FirstOrDefault()
+            })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (existingChat is not null)
@@ -36,6 +41,7 @@ public class CreateOrGetPrivateChatCommandHandler(
                 IsNew: false,
                 recipient.Id,
                 recipient.UserName,
+                existingChat.OtherParticipantLastReadMessageId,
                 existingChat.CreatedAt);
 
         var now = DateTime.UtcNow;
@@ -62,6 +68,7 @@ public class CreateOrGetPrivateChatCommandHandler(
             IsNew: true,
             recipient.Id,
             recipient.UserName,
+            null,
             now);
     }
 }

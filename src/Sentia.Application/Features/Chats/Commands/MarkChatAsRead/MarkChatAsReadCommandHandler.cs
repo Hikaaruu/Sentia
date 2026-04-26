@@ -16,12 +16,12 @@ public class MarkChatAsReadCommandHandler(
         MarkChatAsReadCommand request,
         CancellationToken cancellationToken)
     {
-        var message = await context.Messages
+        var senderId = await context.Messages
             .Where(m => m.Id == request.MessageId && m.ChatId == request.ChatId)
-            .Select(m => new { m.Id, m.SenderId })
+            .Select(m => m.SenderId)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (message is null)
+        if (senderId is null)
             throw new NotFoundException("Message", request.MessageId);
 
         var readStatus = await context.ChatReadStatus
@@ -50,7 +50,7 @@ public class MarkChatAsReadCommandHandler(
         await publisher.Publish(new MessageReadEvent(
             MessageId: request.MessageId,
             ChatId: request.ChatId,
-            SenderId: message.SenderId,
+            SenderId: senderId,
             ReadByUserId: request.CurrentUserId),
             cancellationToken);
 

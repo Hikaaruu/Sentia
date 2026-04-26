@@ -7,4 +7,5 @@ public record ChatSummaryDto(
     DateTime? LastMessageAt,
     string? LastMessageContent,
     string? LastMessageSenderId,
-    int UnreadCount);
+    int UnreadCount,
+    string? OtherParticipantLastReadMessageId);

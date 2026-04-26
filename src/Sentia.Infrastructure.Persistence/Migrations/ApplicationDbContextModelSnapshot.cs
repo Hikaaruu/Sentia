@@ -80,8 +80,8 @@ namespace Sentia.Infrastructure.Persistence.Migrations
                     b.Property<long>("ChatId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("LastReadMessageId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("LastReadMessageId")
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("datetime2");
@@ -98,11 +98,9 @@ namespace Sentia.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Sentia.Domain.Entities.Message", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+                    b.Property<string>("Id")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<long>("ChatId")
                         .HasColumnType("bigint");
@@ -135,6 +133,22 @@ namespace Sentia.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("IX_Messages_ChatId_CreatedAt");
 
                     b.ToTable("Messages", (string)null);
+                });
+
+            modelBuilder.Entity("Sentia.Domain.Entities.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Sentia.Infrastructure.Persistence.ApplicationUser", b =>

@@ -1,0 +1,177 @@
+import { useEffect, useRef } from "react";
+import { useMessages } from "@/hooks/use-messages";
+import { useMarkAsRead } from "@/hooks/use-chats";
+import { useChats } from "@/hooks/use-chats";
+import { useAuthStore } from "@/stores/auth.store";
+import { MessageBubble } from "./message-bubble";
+import { TypingIndicator } from "./typing-indicator";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function isSameDay(a: string, b: string) {
+  const da = new Date(a);
+  const db = new Date(b);
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
+}
+
+function formatDateLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  if (isSameDay(iso, today.toISOString())) return "Today";
+  if (isSameDay(iso, yesterday.toISOString())) return "Yesterday";
+  return d.toLocaleDateString([], {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+interface MessageListProps {
+  chatId: number;
+}
+
+export function MessageList({ chatId }: MessageListProps) {
+  const userId = useAuthStore((s) => s.user?.userId);
+  const { data, isFetchingPreviousPage, hasPreviousPage, fetchPreviousPage } =
+    useMessages(chatId);
+  const { mutate: markAsRead } = useMarkAsRead(chatId);
+  const { data: chats } = useChats();
+
+  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const isInitialLoad = useRef(true);
+
+  const chat = chats?.find((c) => c.chatId === chatId);
+  const otherLastReadId = chat?.otherParticipantLastReadMessageId ?? null;
+
+  // Scroll to bottom on initial load and new incoming messages
+  useEffect(() => {
+    if (isInitialLoad.current && data?.messages?.length) {
+      bottomRef.current?.scrollIntoView({ behavior: "instant" });
+      isInitialLoad.current = false;
+    }
+  }, [data?.messages?.length]);
+
+  // Auto-scroll to bottom when new messages arrive (only if already near bottom)
+  const prevLength = useRef(0);
+  useEffect(() => {
+    const messages = data?.messages ?? [];
+    if (messages.length > prevLength.current && !isInitialLoad.current) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.senderId === userId) {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+    prevLength.current = messages.length;
+  }, [data?.messages, userId]);
+
+  // Observe top sentinel for infinite scroll
+  useEffect(() => {
+    const sentinel = topSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0]?.isIntersecting &&
+          hasPreviousPage &&
+          !isFetchingPreviousPage
+        ) {
+          fetchPreviousPage();
+        }
+      },
+      { threshold: 0 },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasPreviousPage, isFetchingPreviousPage, fetchPreviousPage]);
+
+  // Mark messages as read when the chat is open and has unread messages
+  const markReadRef = useRef(markAsRead);
+  markReadRef.current = markAsRead;
+
+  useEffect(() => {
+    const messages = data?.messages;
+    if (!messages?.length) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.senderId !== userId) {
+      markReadRef.current({ messageId: lastMsg.id });
+    }
+  }, [data?.messages, userId]);
+
+  const messages = data?.messages ?? [];
+
+  return (
+    <div
+      className="flex-1 overflow-y-auto px-4 py-4"
+      style={{ overflowAnchor: "auto" } as React.CSSProperties}
+    >
+      {/* Top sentinel — overflow-anchor: none so browser doesn't anchor to it */}
+      <div
+        ref={topSentinelRef}
+        style={{ overflowAnchor: "none" } as React.CSSProperties}
+      />
+
+      {isFetchingPreviousPage && (
+        <div className="flex flex-col gap-2 pb-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}
+            >
+              <Skeleton className="h-10 w-48 rounded-2xl" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1">
+        {messages.map((message, idx) => {
+          const prevMessage = messages[idx - 1];
+          const showDateSeparator =
+            !prevMessage ||
+            !isSameDay(prevMessage.createdAt, message.createdAt);
+
+          const isOwn = message.senderId === userId;
+          const isRead =
+            isOwn && otherLastReadId !== null && message.id <= otherLastReadId;
+
+          return (
+            <div key={message.id}>
+              {showDateSeparator && (
+                <div className="my-3 flex items-center gap-3">
+                  <div className="flex-1 border-t border-border" />
+                  <span className="text-xs text-muted-foreground">
+                    {formatDateLabel(message.createdAt)}
+                  </span>
+                  <div className="flex-1 border-t border-border" />
+                </div>
+              )}
+              <MessageBubble message={message} isOwn={isOwn} isRead={isRead} />
+            </div>
+          );
+        })}
+      </div>
+
+      {chat && (
+        <TypingIndicator
+          chatId={chatId}
+          username={chat.otherParticipantUsername}
+        />
+      )}
+
+      {/* Bottom anchor — scrolled to on new own messages */}
+      <div
+        ref={bottomRef}
+        style={{ overflowAnchor: "none" } as React.CSSProperties}
+      />
+    </div>
+  );
+}

@@ -13,30 +13,32 @@ namespace Sentia.API.Controllers;
 public class AuthController(ISender sender, JwtService jwtService) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new RegisterCommand(request.Username, request.Password), cancellationToken);
         var token = jwtService.GenerateToken(result.UserId, result.Username);
-        return Ok(new { token, result.UserId, result.Username });
+        return Ok(new AuthResponse(token, result.UserId, result.Username));
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new LoginCommand(request.Username, request.Password), cancellationToken);
         var token = jwtService.GenerateToken(result.UserId, result.Username);
-        return Ok(new { token, result.UserId, result.Username });
+        return Ok(new AuthResponse(token, result.UserId, result.Username));
     }
 
     [Authorize]
     [HttpGet("me")]
-    public IActionResult Me()
+    public ActionResult<MeResponse> Me()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var username = User.FindFirstValue(ClaimTypes.Name)!;
-        return Ok(new { userId, username });
+        return Ok(new MeResponse(userId, username));
     }
 }
 
 public record RegisterRequest(string Username, string Password);
 public record LoginRequest(string Username, string Password);
+public record AuthResponse(string Token, string UserId, string Username);
+public record MeResponse(string UserId, string Username);
