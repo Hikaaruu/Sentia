@@ -21,10 +21,10 @@ A real-time chat application featuring live AI sentiment analysis. Sentia demons
 [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?logo=shadcnui&logoColor=white)](https://ui.shadcn.com/)
 
 ### ☁️ Cloud & DevOps
-[![Azure App Service](https://img.shields.io/badge/Azure_App_Service-008AD7?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
-[![Azure Static Web Apps](https://img.shields.io/badge/Azure_Static_Web_Apps-008AD7?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
-[![Azure SQL](https://img.shields.io/badge/Azure_SQL-008AD7?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
-[![Azure AI](https://img.shields.io/badge/Azure_AI_Language-008AD7?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/)
+[![Azure App Service](https://img.shields.io/badge/Azure_App_Service-008AD7?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/en-us/products/app-service/)
+[![Azure Static Web Apps](https://img.shields.io/badge/Azure_Static_Web_Apps-008AD7?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/en-us/products/app-service/static)
+[![Azure SQL](https://img.shields.io/badge/Azure_SQL-008AD7?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/en-us/products/azure-sql/database/)
+[![Azure AI](https://img.shields.io/badge/Azure_AI_Language-008AD7?logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/en-us/products/ai-services/ai-language/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](https://github.com/features/actions)
 
 
