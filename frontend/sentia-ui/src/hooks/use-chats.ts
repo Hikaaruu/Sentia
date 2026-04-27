@@ -12,6 +12,7 @@ export function useChats() {
   return useQuery({
     queryKey: ["chats"],
     queryFn: getChats,
+    staleTime: 30_000,
     select: (data) =>
       [...data].sort(
         (a, b) =>
@@ -42,7 +43,7 @@ export function useMarkAsRead(chatId: number) {
 
   return useMutation({
     mutationFn: (data: MarkAsReadRequest) => markChatAsRead(chatId, data),
-    onSuccess(_, variables) {
+    onSuccess() {
       queryClient.setQueryData<ChatSummaryDto[]>(["chats"], (old) => {
         if (!old) return old;
         return old.map((chat) =>
@@ -50,11 +51,11 @@ export function useMarkAsRead(chatId: number) {
             ? {
                 ...chat,
                 unreadCount: 0,
-                otherParticipantLastReadMessageId: variables.messageId,
               }
             : chat,
         );
       });
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
     },
   });
 }

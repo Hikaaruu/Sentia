@@ -146,7 +146,10 @@ export function useSignalR() {
 
     connection.on("ReceiveReadReceipt", (payload: ReadReceiptPayload) => {
       queryClient.setQueryData<ChatSummaryDto[]>(["chats"], (old) => {
-        if (!old) return old;
+        if (!old) {
+          queryClient.invalidateQueries({ queryKey: ["chats"] });
+          return old;
+        }
         return old.map((chat) =>
           chat.chatId === payload.chatId
             ? { ...chat, otherParticipantLastReadMessageId: payload.messageId }
