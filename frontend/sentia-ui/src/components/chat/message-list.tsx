@@ -57,6 +57,7 @@ export function MessageList({ chatId }: MessageListProps) {
   useEffect(() => {
     isInitialLoad.current = true;
     lastMessageIdRef.current = null;
+    lastReadSentRef.current = null;
   }, [chatId]);
 
   useEffect(() => {
@@ -113,12 +114,14 @@ export function MessageList({ chatId }: MessageListProps) {
   useEffect(() => {
     const messages = data?.messages;
     if (!messages?.length) return;
-    const lastOtherMsg = messages.findLast((msg) => msg.senderId !== userId);
+    const lastOtherMsg = messages.findLast(
+      (msg) => msg.senderId !== userId && msg.chatId === chatId,
+    );
     if (lastOtherMsg && lastReadSentRef.current !== lastOtherMsg.id) {
       lastReadSentRef.current = lastOtherMsg.id;
       markReadRef.current({ messageId: lastOtherMsg.id });
     }
-  }, [data?.messages, userId]);
+  }, [data?.messages, userId, chatId]);
 
   const messages = data?.messages ?? [];
 
