@@ -53,7 +53,6 @@ export function MessageList({ chatId }: MessageListProps) {
   const lastMessageIdRef = useRef<string | null>(null);
   const isInitialLoad = useRef(true);
 
-  // Reset scroll state when the chat changes
   useEffect(() => {
     isInitialLoad.current = true;
     lastMessageIdRef.current = null;
@@ -73,7 +72,6 @@ export function MessageList({ chatId }: MessageListProps) {
       }
       isInitialLoad.current = false;
     } else if (lastMsg.id !== lastMessageIdRef.current) {
-      // New message appended — scroll to bottom regardless of sender
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop =
           scrollContainerRef.current.scrollHeight;
@@ -83,7 +81,6 @@ export function MessageList({ chatId }: MessageListProps) {
     lastMessageIdRef.current = lastMsg.id;
   }, [data?.messages]);
 
-  // Observe top sentinel for infinite scroll
   useEffect(() => {
     const sentinel = topSentinelRef.current;
     if (!sentinel) return;
@@ -105,7 +102,6 @@ export function MessageList({ chatId }: MessageListProps) {
     return () => observer.disconnect();
   }, [hasPreviousPage, isFetchingPreviousPage, fetchPreviousPage]);
 
-  // Mark messages as read when the chat is open and has unread messages
   const markReadRef = useRef(markAsRead);
   markReadRef.current = markAsRead;
 
@@ -131,7 +127,6 @@ export function MessageList({ chatId }: MessageListProps) {
       className="flex-1 overflow-y-auto px-4 py-4"
       style={{ overflowAnchor: "auto" } as React.CSSProperties}
     >
-      {/* Top sentinel — overflow-anchor: none so browser doesn't anchor to it */}
       <div
         ref={topSentinelRef}
         style={{ overflowAnchor: "none" } as React.CSSProperties}
@@ -178,7 +173,6 @@ export function MessageList({ chatId }: MessageListProps) {
         })}
       </div>
 
-      {/* Bottom anchor — scrolled to on new own messages */}
       <div
         ref={bottomRef}
         style={{ overflowAnchor: "none" } as React.CSSProperties}

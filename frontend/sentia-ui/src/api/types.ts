@@ -1,5 +1,3 @@
-// ─── Auth ────────────────────────────────────────────────────────────────────
-
 export interface LoginRequest {
   username: string;
   password: string;
@@ -21,8 +19,6 @@ export interface MeResponse {
   username: string;
 }
 
-// ─── Sentiment ───────────────────────────────────────────────────────────────
-
 export const SentimentLabel = {
   Positive: 1,
   Neutral: 2,
@@ -31,8 +27,6 @@ export const SentimentLabel = {
 
 export type SentimentLabel =
   (typeof SentimentLabel)[keyof typeof SentimentLabel];
-
-// ─── Messages ────────────────────────────────────────────────────────────────
 
 export interface MessageDto {
   id: string;
@@ -52,8 +46,6 @@ export interface SendMessageRequest {
 export interface SendMessageResponse {
   messageId: string;
 }
-
-// ─── Chats ───────────────────────────────────────────────────────────────────
 
 export interface ChatSummaryDto {
   chatId: number;
@@ -83,8 +75,6 @@ export interface MarkAsReadRequest {
   messageId: string;
 }
 
-// ─── Users ───────────────────────────────────────────────────────────────────
-
 export interface UserDto {
   id: string;
   userName: string;
@@ -96,8 +86,6 @@ export interface PaginatedResponse<T> {
   page: number;
   pageSize: number;
 }
-
-// ─── SignalR payloads ─────────────────────────────────────────────────────────
 
 export interface NewMessagePayload {
   messageId: string;

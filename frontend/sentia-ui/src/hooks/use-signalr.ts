@@ -93,7 +93,6 @@ export function useSignalR() {
         return { ...old, pages };
       });
 
-      // Update chat list summary
       queryClient.setQueryData<ChatSummaryDto[]>(["chats"], (old) => {
         if (!old) return old;
 

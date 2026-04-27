@@ -20,7 +20,6 @@ export function Sidebar() {
   return (
     <>
       <aside className="flex h-full w-full flex-col border-r border-border bg-background">
-        {/* Header */}
         <div className="flex h-14 items-center justify-between px-4">
           <span className="text-base font-semibold tracking-tight">Sentia</span>
           <Button
@@ -36,14 +35,12 @@ export function Sidebar() {
 
         <Separator />
 
-        {/* Chat list */}
         <div className="flex-1 overflow-y-auto">
           <ChatList chats={chats} isLoading={isLoading} />
         </div>
 
         <Separator />
 
-        {/* Footer */}
         <div className="flex items-center gap-3 px-4 py-3">
           <Avatar className="h-7 w-7 shrink-0">
             <AvatarFallback className="text-[10px]">{initials}</AvatarFallback>

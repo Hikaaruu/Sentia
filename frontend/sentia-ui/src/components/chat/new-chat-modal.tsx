@@ -30,7 +30,6 @@ export function NewChatModal({ open, onOpenChange }: NewChatModalProps) {
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Infinite scroll sentinel
   useEffect(() => {
     const el = bottomRef.current;
     if (!el) return;
@@ -50,7 +49,6 @@ export function NewChatModal({ open, onOpenChange }: NewChatModalProps) {
     chats?.map((c) => c.otherParticipantId) ?? [],
   );
   const allUsers: UserDto[] = data?.pages.flatMap((p) => p.items) ?? [];
-  // Exclude self
   const users = allUsers.filter((u) => u.id !== userId);
 
   function handleSelect(user: UserDto) {

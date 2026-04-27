@@ -25,7 +25,6 @@ export default function ChatWindow() {
   const chat = chats?.find((c) => c.chatId === chatId);
 
   if (!chat) {
-    // Still loading or invalid chatId
     return <Navigate to="/chats" replace />;
   }
 

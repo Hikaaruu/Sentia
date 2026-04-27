@@ -1,4 +1,3 @@
-// src/stores/presence.store.ts
 import { create } from "zustand";
 
 interface PresenceState {

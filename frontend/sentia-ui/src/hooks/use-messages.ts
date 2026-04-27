@@ -27,7 +27,6 @@ export function useMessages(chatId: number) {
     getNextPageParam: () => undefined,
     select: (data) => ({
       ...data,
-      // Flatten oldest→newest for rendering
       messages: data.pages.flat(),
     }),
   });
@@ -81,7 +80,6 @@ export function useSendMessage(chatId: number) {
       toast.error("Failed to send message");
     },
     onSuccess(_data, _vars, context) {
-      // Replace optimistic message id with confirmed id from server
       if (!context) return;
       queryClient.setQueryData<{
         pages: MessageDto[][];

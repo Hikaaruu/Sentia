@@ -57,7 +57,6 @@ public class ChatQueryService(ISqlConnectionFactory sqlConnectionFactory) : ICha
 
         using var connection = sqlConnectionFactory.CreateConnection();
 
-        // Dapper automatically maps the SQL columns to the ChatSummaryDto properties
         var results = await connection.QueryAsync<ChatSummaryDto>(
             sql,
             new { UserId = userId });
