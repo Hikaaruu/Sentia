@@ -2,6 +2,8 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Sentia.API.Infrastructure;
 using Sentia.API.Services;
 using Sentia.Application.Features.Auth.Commands.Login;
 using Sentia.Application.Features.Auth.Commands.Register;
@@ -13,6 +15,7 @@ namespace Sentia.API.Controllers;
 public class AuthController(ISender sender, JwtService jwtService) : ControllerBase
 {
     [HttpPost("register")]
+    [EnableRateLimiting(RateLimitingServiceExtensions.RegisterPolicy)]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new RegisterCommand(request.Username, request.Password), cancellationToken);
@@ -21,6 +24,7 @@ public class AuthController(ISender sender, JwtService jwtService) : ControllerB
     }
 
     [HttpPost("login")]
+    [EnableRateLimiting(RateLimitingServiceExtensions.LoginPolicy)]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new LoginCommand(request.Username, request.Password), cancellationToken);

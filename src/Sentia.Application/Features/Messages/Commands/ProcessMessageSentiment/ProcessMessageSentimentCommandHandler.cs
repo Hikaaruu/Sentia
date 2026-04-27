@@ -16,12 +16,12 @@ internal sealed class ProcessMessageSentimentCommandHandler(
 
         var message = await context.Messages.FindAsync([request.MessageId], cancellationToken);
 
-        if (message is not null)
-        {
-            message.SentimentLabel = result.Label;
-            message.SentimentScore = result.Score;
-            await context.SaveChangesAsync(cancellationToken);
-        }
+        if (message is null)
+            return;
+
+        message.SentimentLabel = result.Label;
+        message.SentimentScore = result.Score;
+        await context.SaveChangesAsync(cancellationToken);
 
         var payload = new SentimentUpdatePayload(
             MessageId: request.MessageId,

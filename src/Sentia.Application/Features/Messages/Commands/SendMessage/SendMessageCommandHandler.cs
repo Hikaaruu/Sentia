@@ -13,6 +13,12 @@ public class SendMessageCommandHandler(
 {
     public async Task<SendMessageResult> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
+        var messageExists = await context.Messages
+            .AnyAsync(m => m.Id == request.MessageId, cancellationToken);
+
+        if (messageExists)
+            throw new Common.Exceptions.ValidationException("MessageId", "A message with this ID already exists.");
+
         var participantIds = await context.ChatParticipants
             .Where(cp => cp.ChatId == request.ChatId)
             .Select(cp => cp.UserId)
@@ -34,7 +40,7 @@ public class SendMessageCommandHandler(
         context.Messages.Add(message);
 
         var chat = await context.Chats.FindAsync([request.ChatId], cancellationToken);
-        chat?.LastMessageAt = now;
+        chat!.LastMessageAt = now;
 
         await context.SaveChangesAsync(cancellationToken);
 
