@@ -101,12 +101,9 @@ public class MarkChatAsReadCommandHandlerTests
     [Fact]
     public async Task Handle_TargetMessageOlderThanCurrentReadMessage_ReturnsEarlyWithoutSavingOrPublishing()
     {
-        // This test uses Mock<IApplicationDbContext> for precise Times.Never verification.
         var older = new DateTime(2026, 1, 1, 9, 0, 0, DateTimeKind.Utc);
         var newer = new DateTime(2026, 1, 1, 11, 0, 0, DateTimeKind.Utc);
 
-        // We need a real InMemory context to seed data, but we need to verify SaveChangesAsync is not called.
-        // Strategy: seed via real context, then swap to a wrapping mock that delegates queries to it but spies on SaveChangesAsync.
         await using var seedContext = TestApplicationDbContext.Create();
 
         var chat = new Chat { Id = 1, Type = ChatType.Private, CreatedAt = DateTime.UtcNow };
@@ -124,7 +121,6 @@ public class MarkChatAsReadCommandHandlerTests
         });
         await seedContext.SaveChangesAsync(CancellationToken.None);
 
-        // Use a second InMemory context with same data
         await using var context = TestApplicationDbContext.Create();
         context.Chats.Add(new Chat { Id = 1, Type = ChatType.Private, CreatedAt = DateTime.UtcNow });
         context.Messages.AddRange(
@@ -138,7 +134,6 @@ public class MarkChatAsReadCommandHandlerTests
         });
         await context.SaveChangesAsync(CancellationToken.None);
 
-        // Now use a Moq mock that wraps the context to spy on SaveChangesAsync
         var mockContext = new Mock<IApplicationDbContext>();
         mockContext.Setup(c => c.Messages).Returns(context.Messages);
         mockContext.Setup(c => c.ChatReadStatus).Returns(context.ChatReadStatus);
