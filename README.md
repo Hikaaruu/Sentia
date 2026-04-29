@@ -65,9 +65,9 @@ Experience the real-time messaging and live AI sentiment analysis firsthand by e
 
 The project follows a strict layered architecture to ensure separation of concerns, testability, and scalability:
 
-- **`Sentia.Domain`** – The enterprise core. Contains fundamental business entities (`Chat`, `Message`, `ChatParticipant`), enums, and domain events. It has absolutely zero external project dependencies.
-- **`Sentia.Application`** – The use-case orchestrator. Houses all business logic using CQRS via MediatR (e.g., `SendMessageCommand`, `GetUserChatsQuery`). It includes DTOs, FluentValidation rules, and custom MediatR pipeline behaviors for Cross-Cutting Concerns (Validation and Authorization).
-- **`Sentia.Infrastructure.Persistence`** – The data layer. Manages SQL Server access containing the EF Core `ApplicationDbContext`, Fluent API entity configurations, migrations, and highly optimized read-only data access using Dapper (`ChatQueryService`).
+- **`Sentia.Domain`** – The enterprise core. Contains fundamental business entities (`Chat`, `Message`, `ChatParticipant`) and enums.
+- **`Sentia.Application`** – The use-case orchestrator. Houses all business logic using CQRS via MediatR. It includes DTOs, FluentValidation rules, and custom MediatR pipeline behaviors for Cross-Cutting Concerns (Validation and Authorization).
+- **`Sentia.Infrastructure.Persistence`** – The data layer. Manages SQL Server access containing the EF Core `ApplicationDbContext`, Fluent API entity configurations, migrations, and read-only data access using Dapper.
 - **`Sentia.Infrastructure.Cognitive`** – The AI layer. Isolated integration with Azure Cognitive Services for Text Analytics. It implements a thread-safe `System.Threading.Channels` queue to offload sentiment processing from the main web threads.
 - **`Sentia.Infrastructure.RealTime`** – The WebSocket layer. Encapsulates the Azure SignalR `ChatHub`, mapping user connections to SignalR groups, and manages live user states via the `PresenceTracker`.
 - **`Sentia.API`** – The presentation/entry point. Exposes RESTful Controllers, configures Dependency Injection, handles JWT Bearer Authentication, enforces API Rate Limiting, maps global exceptions to `ProblemDetails`, and hosts the `SentimentBackgroundWorker`.
@@ -94,7 +94,7 @@ The project follows a strict layered architecture to ensure separation of concer
 ### Frontend
 - **Framework:** React 19, Vite, TypeScript
 - **Styling:** Tailwind CSS v4, shadcn/ui components, Lucide Icons
-- **State Management:** Zustand (Global State & Presence), TanStack React Query (Data Fetching, Caching, Optimistic UI updates)
+- **State Management:** Zustand, TanStack React Query
 - **Forms & Validation:** React Hook Form + Zod
 - **Real-Time:** `@microsoft/signalr`
 
@@ -115,3 +115,92 @@ The project follows a strict layered architecture to ensure separation of concer
 ## 🗄️ Database Schema
 
 ![Database Entity-Relationship Diagram](docs/db-diagram.svg)
+
+---
+
+## ⚙️ Local Setup
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/Hikaaruu/Sentia.git
+cd Sentia
+```
+
+2. **Configure backend settings**
+```json
+{
+  "ConnectionStrings": {
+    "SentiaDatabase": "YOUR_SQL_SERVER_CONNECTION_STRING",
+    "AzureSignalR": "YOUR_AZURE_SIGNALR_CONNECTION_STRING"
+  },
+  "AzureAiLanguage": {
+    "Endpoint": "YOUR_AZURE_AI_ENDPOINT",
+    "ApiKey": "YOUR_AZURE_AI_KEY"
+  },
+  "Jwt": {
+    "Key": "YOUR_JWT_KEY",
+    "Issuer": "Sentia",
+    "Audience": "Sentia"
+  },
+  "Cors": {
+    "AllowedOrigins": [
+      "YOUR_FRONTEND_URL" 
+    ]
+  }
+}
+```
+
+3. **Apply database migrations**
+```bash
+dotnet ef database update --project Sentia.Infrastructure.Persistence --startup-project Sentia.API
+```
+
+4. **Run the backend application**
+```bash
+dotnet run --project Sentia.API
+```
+
+5. **Configure frontend settings**
+```env
+VITE_API_URL="https://localhost:<YOUR_BACKEND_PORT>/api"
+VITE_HUB_URL="https://localhost:<YOUR_BACKEND_PORT>/chatHub"
+```
+
+6. **Run the frontend application**
+```bash
+cd frontend/sentia-ui
+npm install
+npm run dev
+```
+
+---
+
+### 📡 API Overview
+
+🔐 **Authentication**
+User registration, secure login, and identity verification
+`/api/auth/register`, `/api/auth/login`, `/api/auth/me`
+
+👥 **User Directory**
+Discover and retrieve paginated user lists for starting conversations
+`/api/users`
+
+💬 **Chats & Conversations**
+Create chats, retrieve chat summaries, and manage read receipts
+`/api/chats`
+`/api/chats/{chatId}/read`
+
+✉️ **Messages**
+Send messages and retrieve paginated chat history
+`/api/chats/{chatId}/messages`
+
+---
+
+### 🧪 Testing
+
+Run test with:
+```bash
+dotnet test
+```
+
+Includes application and data access tests powered by **xUnit**, **Moq**, **FluentAssertions**, and an **EF Core In-Memory** database.
