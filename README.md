@@ -175,7 +175,7 @@ npm run dev
 
 ---
 
-### 📡 API Overview
+## 📡 API Overview
 
 🔐 **Authentication**
 User registration, secure login, and identity verification
@@ -196,7 +196,7 @@ Send messages and retrieve paginated chat history
 
 ---
 
-### 🧪 Testing
+## 🧪 Testing
 
 Run test with:
 ```bash
