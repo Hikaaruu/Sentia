@@ -38,12 +38,12 @@ Experience the real-time messaging and live AI sentiment analysis firsthand by e
 
 ## ✨ Key Capabilities
 
-💬 **Real-Time Messaging:** Lightning-fast, bi-directional communication powered by Azure SignalR.  
-🧠 AI Sentiment Analysis: Real-time processing of message tone (Positive 🟢, Neutral ⚪, Negative 🔴) using Azure Cognitive Services. This is handled via a non-blocking background System.Threading.Channel to keep the chat instantly responsive.
-🟢 **Presence Tracking:** Live online status indicators for users.  
-✍️ **Typing Indicators:** Real-time animated "user is typing..." feedback.  
-🛡️ **Security & Rate Limiting:** JWT-based authentication, Azure Key Vault secret management, and endpoint rate-limiting.  
-🚀 **Optimized Data Fetching:** Write operations are handled by Entity Framework Core, while complex read queries are optimized using **Dapper**.  
+- 💬 **Real-Time Messaging:** Lightning-fast, bi-directional communication powered by Azure SignalR.
+- 🧠 **AI Sentiment Analysis:** Real-time processing of message tone (Positive 🟢, Neutral ⚪, Negative 🔴) using Azure Cognitive Services. This is handled via a non-blocking background `System.Threading.Channel` to keep the chat instantly responsive.
+- 🟢 **Presence Tracking:** Live online status indicators for users.
+- ✍️ **Typing Indicators:** Real-time animated "user is typing..." feedback.
+- 🛡️ **Security & Rate Limiting:** JWT-based authentication, Azure Key Vault secret management, and endpoint rate-limiting.
+- 🚀 **Optimized Data Fetching:** Write operations are handled by Entity Framework Core, while complex read queries are optimized using **Dapper**.
 
 ---
 
